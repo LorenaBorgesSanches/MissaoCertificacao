@@ -1,3 +1,6 @@
+import datetime
+
+
 def cpf_validate(numbers: str):
     cpf = [int(char) for char in numbers if char.isdigit()]
     cpfTesto = "".join([char for char in numbers if char.isdigit()])
@@ -27,8 +30,24 @@ def telefone_validate(telefone: str):
     return True
 
 
+def converter_data(data: str):
+    parteData = data.split('-')
+    parteHora = parteData[2].split(' ')[1].split(':')
+
+    ano = int(parteData[0])
+    mes = int(parteData[1])
+    dia = int(parteData[2].split(' ')[0])
+    hora = int(parteHora[0])
+    minuto = int(parteHora[1])
+    segundo = int(parteHora[2])
+
+    return datetime.datetime(
+        ano, mes, dia, hora, minuto, segundo
+    )
+
+
 def item_formulario(sg, label, tipo, valor='', opcoes=(), bloqueado=False):
     if tipo == 'input':
         return [sg.Text(label + ":", size=(12, 1)), sg.Input(valor, key='-' + label + '-', expand_x=True, disabled=bloqueado)]
     else:
-        return [sg.Text(label + ":", size=(12, 1)), sg.Combo(key='-' + label + '-', values=opcoes, default_value=valor, expand_x=True, disabled=bloqueado)],
+        return [sg.Text(label + ":", size=(12, 1)), sg.Combo(key='-' + label + '-', values=opcoes, default_value=valor, expand_x=True, disabled=bloqueado, readonly=True)],

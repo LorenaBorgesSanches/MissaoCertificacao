@@ -1,5 +1,5 @@
 import PySimpleGUI as sg
-from modelo import Ferramenta, Tecnico
+from modelo import Ferramenta, Reserva, Tecnico
 from persistencia import DB
 from util import item_formulario
 
@@ -37,10 +37,26 @@ layoutFerramentas = [[sg.Button("Novo", key='-NEW-TOOL-'), sg.Button("Editar",  
                                key='-TABLE-TOOL-',
                                row_height=25, expand_x=True, expand_y=True)]]
 
+# ---- RESERVAS ----
+cabecalhoReservas = ["Id", "Ferramenta", "Técnico", "Descrição", "Data de Retirada", "Data de Devolução"]
+
+layoutReservas = [[sg.Button("Novo", key='-NEW-RES-'), sg.Button("Editar",  key='-EDIT-RES-'), sg.Button("Excluir",  key='-DEL-RES-'), sg.Button("Pesquisar", key='-FILTER-RES-', size=(100, 1))],
+                  [sg.Text("Filtro"), sg.Input(key='-FILTER-RES-INPUT-')],
+                  [sg.Table(values=db.getTabelaReservas(), headings=cabecalhoReservas, max_col_width=25,
+                            background_color='black',
+                            auto_size_columns=True,
+                            display_row_numbers=True,
+                            justification='right',
+                            num_rows=20,
+                            alternating_row_color='black',
+                            key='-TABLE-RES-',
+                            row_height=25, expand_x=True, expand_y=True)]]
+
 # ---- TELA PRINCIPAL ----
 layout = [[sg.TabGroup(
     [[sg.Tab('Técnicos', layoutTecnicos),
-      sg.Tab('Ferramentas', layoutFerramentas), ]],
+      sg.Tab('Ferramentas', layoutFerramentas), 
+      sg.Tab('Reservas', layoutReservas)]],
     key='-TAB GROUP-', expand_x=True, expand_y=True)]]
 
 window = sg.Window('Sistema', layout, location=(0, 0),
@@ -350,4 +366,146 @@ while True:
 
         window['-TABLE-TOOL-'].update(dadosFerramentasFiltrados)
 
+    if event == '-NEW-RES-':
+        col_layout = [[sg.Button('Cancelar'), sg.Button('OK')]]
+        layout = [
+            item_formulario(sg, "Id", "input", bloqueado=True),
+            item_formulario(sg, "Ferramenta", "combo", "", db.getFerramentasParaCampo()),
+            item_formulario(sg, "Técnico", "combo", "", db.getTecnicosParaCampo()),
+            item_formulario(sg, "Descrição", "input"),
+            [sg.Text('Data Retirada :', size=(12, 1)), sg.Input(key='-Data Retirada-', expand_x=True), sg.CalendarButton('Data Retirada',  target='-Data Retirada-', locale='pt_BR', begin_at_sunday_plus=1, size=(14,1) )],
+            [sg.Text('Data Devolução :', size=(12, 1)), sg.Input(key='-Data Devolução-', expand_x=True), sg.CalendarButton('Data Devolução',  target='-Data Devolução-', locale='pt_BR', begin_at_sunday_plus=1, size=(14,1) )],
+            [sg.Text("Erro: ", visible=False, expand_x=True,
+                     key="-ERRO-", text_color='red')],
+            [sg.Column(col_layout, expand_x=True,
+                       element_justification='right')],
+        ]
+        popup = sg.Window("Nova Reserva", layout,
+                          use_default_focus=False, finalize=True, modal=True)
+
+        while True:
+            event, values = popup.read()
+
+            if event == sg.WIN_CLOSED or event == "Cancelar":
+                popup.close()
+                break
+
+            if event == "OK":
+                
+                try:
+                    if values['-Ferramenta-'] == '':
+                        reserva = Reserva('', '')
+                        
+                    if values['-Técnico-'] == '':
+                        reserva = Reserva(values['-Ferramenta-'][0], '')
+                        
+                    reserva = Reserva(values['-Ferramenta-'][0], values['-Técnico-'][0])
+                    reserva.setDescricao(values['-Descrição-'])
+                    reserva.setDataRetirada(values['-Data Retirada-'])
+                    reserva.setDataDevolucao(values['-Data Devolução-'])
+                    db.validarReserva(reserva, values['-Ferramenta-'][0])
+                    db.Reservas.append(reserva)
+                    
+                    window['-TABLE-RES-'].update(db.getTabelaReservas())
+
+                    db.persistirReservas()
+                    popup.close()
+                    break
+
+                except AttributeError as e:
+                    popup['-ERRO-'].update(visible=True)
+                    popup['-ERRO-'].update("Erro: " + str(e))
+                    
+    if event == '-EDIT-RES-':
+        if len(window['-TABLE-RES-'].SelectedRows) == 0:
+            sg.popup("Nenhum item selecionado", keep_on_top=True, modal=True)
+            continue
+
+        if len(window['-TABLE-RES-'].SelectedRows) > 1:
+            sg.popup("Selecione apenas um item", keep_on_top=True, modal=True)
+            continue
+
+        indexLinha = window['-TABLE-RES-'].SelectedRows[0]
+        linha = window['-TABLE-RES-'].Values[indexLinha]
+
+        col_layout = [[sg.Button('Cancelar'), sg.Button('OK')]]
+        layout = [
+            item_formulario(sg, "Id", "input", linha[0], bloqueado=True),
+            item_formulario(sg, "Ferramenta", "combo", linha[1], db.getFerramentasParaCampo(), bloqueado=True),
+            item_formulario(sg, "Técnico", "combo", linha[2], db.getTecnicosParaCampo(), bloqueado=True),
+            item_formulario(sg, "Descrição", "input", linha[3]),
+            [sg.Text('Data Retirada :', size=(12, 1)), sg.Input(linha[4], key='-Data Retirada-', expand_x=True), sg.CalendarButton('Data Retirada',  target='-Data Retirada-', locale='pt_BR', begin_at_sunday_plus=1, size=(14,1) )],
+            [sg.Text('Data Devolução :', size=(12, 1)), sg.Input(linha[5], key='-Data Devolução-', expand_x=True), sg.CalendarButton('Data Devolução',  target='-Data Devolução-', locale='pt_BR', begin_at_sunday_plus=1, size=(14,1) )],
+            [sg.Text("Erro: ", visible=False, expand_x=True,
+                     key="-ERRO-", text_color='red')],
+            [sg.Column(col_layout, expand_x=True,
+                       element_justification='right')],
+        ]
+        popup = sg.Window("Editar Reserva", layout,
+                          use_default_focus=False, finalize=True, modal=True)
+
+        while True:
+            event, values = popup.read()
+
+            if event == sg.WIN_CLOSED or event == "Cancelar":
+                popup.close()
+                break
+
+            if event == "OK":
+                for item in db.Reservas:
+                    if item.Id == linha[0]:
+                        reserva = item
+                        break
+
+                try:
+                    reserva.setDescricao(values['-Descrição-'])
+                    reserva.setDataRetirada(values['-Data Retirada-'])
+                    reserva.setDataDevolucao(values['-Data Devolução-'])
+                    db.validarReserva(reserva, values['-Ferramenta-'])
+
+                    window['-TABLE-RES-'].update(db.getTabelaReservas())
+
+                    db.persistirReservas()
+                    popup.close()
+                    break
+
+                except AttributeError as e:
+                    popup['-ERRO-'].update(visible=True)
+                    popup['-ERRO-'].update("Erro: " + str(e))
+
+    if event == '-DEL-RES-':
+        if len(window['-TABLE-RES-'].SelectedRows) == 0:
+            sg.popup("Nenhum item selecionado", keep_on_top=True, modal=True)
+
+        for indexLinha in window['-TABLE-RES-'].SelectedRows[::-1]:
+            linha = window['-TABLE-RES-'].Values[indexLinha]
+
+            for reserva in db.Reservas:
+                if reserva.Id == linha[0]:
+                    db.Reservas.remove(reserva)
+
+        window['-TABLE-RES-'].update(db.getTabelaReservas())
+        db.persistirReservas()
+
+    if event == '-FILTER-RES-':
+        filtro = values['-FILTER-RES-INPUT-'].lower()
+        dadosReservasFiltradas = []
+
+        if filtro == None or filtro == '':
+            dadosReservasFiltradas = db.getTabelaReservas()
+
+        else:
+            for reserva in db.Reservas:
+                if (filtro in reserva.Id or
+                   filtro in reserva.IdFerramenta or
+                   filtro in reserva.CpfTecnico.lower() or
+                   filtro in reserva.Descricao.lower() or
+                   filtro in str(reserva.DataDevolucao) or
+                   filtro in str(reserva.DataRetirada)):
+                    dadosReservasFiltradas.append([reserva.Id, reserva.IdFerramenta, reserva.CpfTecnico, reserva.Descricao,
+                                                   reserva.DataRetirada, reserva.DataDevolucao])
+
+        window['-TABLE-RES-'].update(dadosReservasFiltradas)
+        
 window.close()
+

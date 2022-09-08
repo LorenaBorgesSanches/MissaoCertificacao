@@ -1,5 +1,6 @@
 import uuid
-from util import cpf_validate, telefone_validate
+from util import converter_data, cpf_validate, telefone_validate
+import datetime
 
 
 class Ferramenta:
@@ -141,3 +142,54 @@ class Tecnico:
 
     def getEquipe(self):
         return self.Equipe
+
+class Reserva:
+    def __init__(self, IdFerramenta: uuid, CpfTecnico: str, Id: uuid = None):
+        if IdFerramenta == None or IdFerramenta == '':
+            raise AttributeError("Obrigatório informar a Ferramenta")
+    
+        if CpfTecnico == None or CpfTecnico == '':
+            raise AttributeError("Obrigatório informar o Técnico")
+        
+        self.Id = Id
+        if Id == None:
+            self.Id = uuid.uuid4()   
+        
+        self.IdFerramenta = IdFerramenta
+        self.CpfTecnico = CpfTecnico
+        self.Descricao = ""
+        self.DataRetirada = ""
+        self.DataDevolucao = ""
+        
+    def setDescricao(self, Descricao: str):
+        if Descricao != None and Descricao != '' and len(Descricao) > 60:
+            raise AttributeError("Descricao deve conter até 60 caracteres")
+        self.Descricao = Descricao
+        
+    def getDescricao(self):
+        return self.Descricao
+
+    def setDataRetirada(self, DataRetirada: datetime.datetime):
+        if DataRetirada == None or DataRetirada == '':
+            raise AttributeError("Obrigatório informar a Data de Retirada")
+        
+        try:
+            self.DataRetirada = converter_data(DataRetirada)
+        except:
+            raise AttributeError("Data de Retirada inválida!")
+        
+    def getDataRetirada(self):
+        return self.DataRetirada
+    
+    def setDataDevolucao(self, DataDevolucao: datetime.datetime):
+        if DataDevolucao == None or DataDevolucao == '':
+            raise AttributeError("Obrigatório informar a Data de Devolução")
+        
+        try:
+            self.DataDevolucao = converter_data(DataDevolucao)
+        except ValueError:
+            raise AttributeError("Data de Devolução inválida!")
+        
+    def getDataDevolucao(self):
+        return self.DataDevolucao
+    
