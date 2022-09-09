@@ -83,11 +83,13 @@ class Ferramenta:
         return self.Material
 
     def setTempoMaximoReserva(self, TempoMaximoReserva: int):
-        if TempoMaximoReserva != None and TempoMaximoReserva != '':
-            try:
-                self.TempoMaximoReserva = int(TempoMaximoReserva)
-            except ValueError:
-                raise AttributeError("O tempo máximo de reserva deve ser somente números!")
+        if TempoMaximoReserva == None or TempoMaximoReserva == '':
+            raise AttributeError("Obrigatório informar o Tempo Máximo de Reserva!")
+        
+        try:
+            self.TempoMaximoReserva = int(TempoMaximoReserva)
+        except ValueError:
+            raise AttributeError("O tempo máximo de reserva deve ser somente números!")
                 
     def getTempoMaximoReserva(self):
         return self.TempoMaximoReserva

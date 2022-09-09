@@ -11,9 +11,9 @@ Para a execução do trabalho são necessárias diversas ferramentas específica
 
   
 
-A gestão das ferramentas deve ser feita de forma centralizada, para que as equipes de manutenção possam fazer reservas com antecedência e que não haja problemas, como interrupção da manutenção devido a falta de alguma ferramenta. **Observação:** Devido a falta de tempo para a entrega do presente projeto, não foi desenvolvida a parte de reserva de ferramentas.
+A gestão das ferramentas deve ser feita de forma centralizada, para que as equipes de manutenção possam fazer reservas com antecedência e que não haja problemas, como interrupção da manutenção devido a falta de alguma ferramenta. 
 
-  
+Essas ferramentas também possuem diversas características técnicas que indicam para qual uso específico elas se aplicam, logo a reserva da correta ferramenta também é um fator crítico para o sucesso do trabalho.
 
 ## Iniciando
 
@@ -31,13 +31,14 @@ A gestão das ferramentas deve ser feita de forma centralizada, para que as equi
 
 ## Link da gravação do Youtube do sistema em funcionamento:
 
+https://youtu.be/3wFffaCx2X4
+
 
 _Nome do curso: Desenvolvimento Full Stack
 Mundo n°: 1
 Turma: 2022.2
 Semestre letivo: 1° semestre
 Grupo: Devteam 9
-Nome dos integrantes do grupo: Lorena Rosa Borges Sanches (Matrícula: 202204376067); João Vitor Fischer (Matrícula: 202205229084)._
-
+Nome dos integrantes do grupo: Lorena Rosa Borges Sanches (Matrícula: 202204376067). **Nenhum outro integrante do grupo participou do desenvolvimento do presente projeto. **_
 
 
